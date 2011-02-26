@@ -5,20 +5,20 @@ using System.Collections.Generic;
 
 namespace Shi_tsu
 {
-    class FolderWatch
+    public class FolderWatch
     {
-        static void outputUsage(bool help = true)
+        protected static void outputUsage(bool help = true)
         {
             Console.WriteLine("   USAGE: folderwatch.exe OPTIONS DIRECTORY");
             if (!help)
                 Console.WriteLine("   For more information, use folderwatch.exe -h");
             Console.WriteLine("   Send 'q' to end program\n");
         }
-        static void help(string param, string desc)
+        protected static void help(string param, string desc)
         {
             Console.WriteLine(string.Format("   {0}{1}",param.PadRight(17, ' '), desc));
         }
-        static void outputHelp()
+        protected static void outputHelp()
         {
             outputUsage();
             help("DIRECTORY", "Path to the directory to be watched.");
@@ -32,7 +32,7 @@ namespace Shi_tsu
         }
 
         // Turn -abc into -a -b -c and keep --abc the same
-        public static List<string> ParamForm(string[] arga)
+        protected static List<string> ParamForm(string[] arga)
         {
             List<string> final = new List<string>();
             arga.ToList().ForEach(arg =>
@@ -52,20 +52,20 @@ namespace Shi_tsu
             return final;
         }
 
-        static List<string> AbandonSwitches(List<string> a)
+        protected static List<string> AbandonSwitches(List<string> a)
         {
             return (from p in a where !p.StartsWith("-") select p).ToList();
         }
 
-        static Tuple<string, DateTime> last;
-        static void handler(object o, FileSystemEventArgs e)
+        protected static Tuple<string, DateTime> last;
+        protected static void handler(object o, FileSystemEventArgs e)
         {
             if(last == null || !(e.Name == last.Item1 && DateTime.Now > last.Item2))
                 Console.WriteLine(e.FullPath.Replace('\\', '/'));
             last = new Tuple<string,DateTime>(e.Name, DateTime.Now.AddMilliseconds(200));
         }
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             List<string> pargs = ParamForm(args);
             if (pargs.Contains("-h") || pargs.Contains("--help"))
