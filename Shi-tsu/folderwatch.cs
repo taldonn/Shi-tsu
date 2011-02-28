@@ -9,7 +9,7 @@ namespace Shi_tsu
     {
         protected static void outputUsage(bool help = true)
         {
-            Console.WriteLine("   USAGE: folderwatch.exe OPTIONS DIRECTORY");
+            Console.WriteLine("   USAGE: folderwatch.exe [OPTIONS] DIRECTORY");
             if (!help)
                 Console.WriteLine("   For more information, use folderwatch.exe -h");
             Console.WriteLine("   Send 'q' to end program\n");

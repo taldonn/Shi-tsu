@@ -1,0 +1,8 @@
+Shi-tsu
+by Sean Whetten
+
+A simple file-system watching command line tool. Takes as input a directory path and outputs the
+path of any file that changes in that directory, like a small annoying dog that barks at every
+little discrepancy it can see through the window.
+
+Basically just a very simple command line wrapper for C#'s FileSystemWatcher class.
