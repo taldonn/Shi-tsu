@@ -1,7 +1,0 @@
-C:\cygwin\home\swhetten\Test\bin\Debug\Test.dll
-C:\cygwin\home\swhetten\Test\bin\Debug\Test.pdb
-C:\cygwin\home\swhetten\Test\bin\Debug\nunit.framework.dll
-C:\cygwin\home\swhetten\Test\bin\Debug\nunit.framework.xml
-C:\cygwin\home\swhetten\Test\obj\Debug\ResolveAssemblyReference.cache
-C:\cygwin\home\swhetten\Test\obj\Debug\Test.dll
-C:\cygwin\home\swhetten\Test\obj\Debug\Test.pdb

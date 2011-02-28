@@ -25,8 +25,7 @@ namespace Shi_tsu
             help("-h", "Display this Help Message");
             help("--help", "Same as -h");
             help("-d", "Report file deletions also");
-            help("-m", "Don't report created files");
-            help("-c", "Don't report changed files");
+            help("-c", "Don't report created or changed files");
             help("-r", "Don't report renamed files");
             help("-s", "Report Changes in Subdirectories also");
         }
@@ -60,7 +59,7 @@ namespace Shi_tsu
         protected static Tuple<string, DateTime> last;
         protected static void handler(object o, FileSystemEventArgs e)
         {
-            if(last == null || !(e.Name == last.Item1 && DateTime.Now > last.Item2))
+            if(e.Name != last.Item1 || DateTime.Now > last.Item2)
                 Console.WriteLine(e.FullPath.Replace('\\', '/'));
             last = new Tuple<string,DateTime>(e.Name, DateTime.Now.AddMilliseconds(200));
         }
@@ -91,16 +90,15 @@ namespace Shi_tsu
                 return;
             }
             
-            watch.NotifyFilter = NotifyFilters.LastWrite;
             if (pargs.Contains("-d"))
                 watch.Deleted += new FileSystemEventHandler(handler);
             if (!pargs.Contains("-c"))
                 watch.Changed += new FileSystemEventHandler(handler);
-            if (!pargs.Contains("-m"))
-                watch.Created += new FileSystemEventHandler(handler);
             if (!pargs.Contains("-r"))
                 watch.Renamed += new RenamedEventHandler(handler);
-            watch.IncludeSubdirectories = pargs.Contains("-d");
+            watch.IncludeSubdirectories = pargs.Contains("-s");
+
+            last = new Tuple<string, DateTime>("", DateTime.Now);
 
             watch.EnableRaisingEvents = true;
             while (Console.ReadKey().KeyChar != 'q') ;
