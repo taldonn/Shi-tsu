@@ -64,18 +64,18 @@ namespace Shi_tsu
             last = new Tuple<string,DateTime>(e.Name, DateTime.Now.AddMilliseconds(200));
         }
 
-        public static void Main(string[] args)
+        public static int Main(string[] args)
         {
             List<string> pargs = ParamForm(args);
             if (pargs.Contains("-h") || pargs.Contains("--help"))
             {
                 outputHelp();
-                return;
+                return 1;
             }
             if (pargs.Count < 1)
             {
                 outputUsage(false);
-                return;
+                return 1;
             }
 
             FileSystemWatcher watch = new FileSystemWatcher();
@@ -87,7 +87,7 @@ namespace Shi_tsu
             {
                 Console.WriteLine("Error: {0}", e.Message);
                 outputUsage();
-                return;
+                return 1;
             }
             
             if (pargs.Contains("-d"))
@@ -102,6 +102,7 @@ namespace Shi_tsu
 
             watch.EnableRaisingEvents = true;
             while (Console.ReadKey().KeyChar != 'q') ;
+            return 0;
         }
     }
 }
