@@ -9,10 +9,12 @@ namespace Shi_tsu
     {
         protected static void outputUsage(bool help = true)
         {
-            Console.WriteLine("   USAGE: folderwatch.exe [OPTIONS] DIRECTORY");
+            Console.WriteLine("   USAGE: "+System.Diagnostics.Process.GetCurrentProcess().ProcessName +
+                ".exe [OPTIONS] DIRECTORY");
             if (!help)
                 Console.WriteLine("   For more information, use folderwatch.exe -h");
-            Console.WriteLine("   Send 'q' to end program\n");
+            Console.WriteLine("   Use -t TIMEOUT to specify a timeout value or");
+            Console.WriteLine("   send 'q' to end program if no timeout has been specified\n");
         }
         protected static void help(string param, string desc)
         {
@@ -28,6 +30,8 @@ namespace Shi_tsu
             help("-c", "Don't report created or changed files");
             help("-r", "Don't report renamed files");
             help("-s", "Report Changes in Subdirectories also");
+            help("-t timeout", "Set an integer timeout value (in ms). The program will automatically");
+            help("", "exit after the timeout has been exceeded.");
         }
 
         // Turn -abc into -a -b -c and keep --abc the same
@@ -79,13 +83,26 @@ namespace Shi_tsu
             }
 
             FileSystemWatcher watch = new FileSystemWatcher();
+            int timeout = -1;
             try
             {
-                watch.Path = AbandonSwitches(pargs).First();
+                if (!pargs.Contains("-t"))
+                    watch.Path = AbandonSwitches(pargs).First();
+                else
+                {
+                    timeout = int.Parse(AbandonSwitches(pargs)[0]);
+                    watch.Path = AbandonSwitches(pargs)[1];
+                }
             }
             catch (ArgumentException e)
             {
-                Console.WriteLine("Error: {0}", e.Message);
+                Console.WriteLine("Error: Directory path does not exist or was not in the right format.");
+                outputUsage();
+                return 1;
+            }
+            catch (FormatException e)
+            {
+                Console.WriteLine("Error: Timeout value not in the right format. Must be an integer.");
                 outputUsage();
                 return 1;
             }
@@ -101,7 +118,13 @@ namespace Shi_tsu
             last = new Tuple<string, DateTime>("", DateTime.Now);
 
             watch.EnableRaisingEvents = true;
-            while (Console.ReadKey().KeyChar != 'q') ;
+            DateTime started = DateTime.Now;
+            if (timeout == -1)
+                while (Console.ReadKey(true).KeyChar != 'q') ;
+            else
+            {
+                System.Threading.Thread.Sleep(timeout);
+            }
             return 0;
         }
     }
