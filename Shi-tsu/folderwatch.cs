@@ -74,7 +74,7 @@ namespace Shi_tsu
                 else
                     watch.Path = AbandonSwitches(args)[1];
             }
-            catch (ArgumentException e)
+            catch (ArgumentException)
             {
                 Console.WriteLine("Error: Directory path does not exist or was not in the right format.");
                 outputUsage();
@@ -89,10 +89,12 @@ namespace Shi_tsu
             if (pargs.Contains("-h") || pargs.Contains("--help"))
             {
                 outputHelp();
-                return 1;
+                return 0;
             }
             FileSystemWatcher watch = new FileSystemWatcher();
-            if (AbandonSwitches(pargs).Count < 1)
+
+            if (AbandonSwitches(pargs).Count < 
+                (pargs.Contains("-t") ? 2 : 1))
             {
                 watch.Path = ".";
             }
@@ -106,7 +108,7 @@ namespace Shi_tsu
                 {
                     timeout = int.Parse(AbandonSwitches(pargs).First());
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     Console.WriteLine("Error: Timeout value not in the right format. Must be an integer.");
                     outputUsage();
