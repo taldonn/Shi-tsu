@@ -7,12 +7,10 @@ namespace Shi_tsu
 {
     public class FolderWatch
     {
-        protected static void outputUsage(bool help = true)
+        protected static void outputUsage()
         {
-            Console.WriteLine("   USAGE: "+System.Diagnostics.Process.GetCurrentProcess().ProcessName +
-                ".exe [OPTIONS] DIRECTORY");
-            if (!help)
-                Console.WriteLine("   For more information, use folderwatch.exe -h");
+            Console.WriteLine("USAGE: "+System.Diagnostics.Process.GetCurrentProcess().ProcessName +
+                ".exe [OPTIONS] [DIRECTORY]");
             Console.WriteLine("   Use -t TIMEOUT to specify a timeout value or");
             Console.WriteLine("   send 'q' to end program if no timeout has been specified\n");
         }
@@ -23,15 +21,15 @@ namespace Shi_tsu
         protected static void outputHelp()
         {
             outputUsage();
-            help("DIRECTORY", "Path to the directory to be watched.");
+            help("DIRECTORY", "Path to the directory to be watched. Defaults to '.'");
             help("-h", "Display this Help Message");
             help("--help", "Same as -h");
             help("-d", "Report file deletions also");
             help("-c", "Don't report created or changed files");
             help("-r", "Don't report renamed files");
             help("-s", "Report Changes in Subdirectories also");
-            help("-t timeout", "Set an integer timeout value (in ms). The program will automatically");
-            help("", "exit after the timeout has been exceeded.");
+            help("-t timeout", "Set an integer timeout value (in ms). The program will");
+            help("", "automatically exit after the timeout has been exceeded.");
         }
 
         // Turn -abc into -a -b -c and keep --abc the same
@@ -67,6 +65,23 @@ namespace Shi_tsu
                 Console.WriteLine(e.FullPath.Replace('\\', '/'));
             last = new Tuple<string,DateTime>(e.Name, DateTime.Now.AddMilliseconds(200));
         }
+        protected static int getPath(List<string> args, FileSystemWatcher watch)
+        {
+            try
+            {
+                if (!args.Contains("-t"))
+                    watch.Path = AbandonSwitches(args).First();
+                else
+                    watch.Path = AbandonSwitches(args)[1];
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine("Error: Directory path does not exist or was not in the right format.");
+                outputUsage();
+                return 1;
+            }
+            return 0;
+        }
 
         public static int Main(string[] args)
         {
@@ -76,36 +91,27 @@ namespace Shi_tsu
                 outputHelp();
                 return 1;
             }
-            if (pargs.Count < 1)
-            {
-                outputUsage(false);
-                return 1;
-            }
-
             FileSystemWatcher watch = new FileSystemWatcher();
+            if (AbandonSwitches(pargs).Count < 1)
+            {
+                watch.Path = ".";
+            }
+            else
+            {
+                getPath(pargs, watch);
+            }
             int timeout = -1;
-            try
-            {
-                if (!pargs.Contains("-t"))
-                    watch.Path = AbandonSwitches(pargs).First();
-                else
+            if (pargs.Contains("-t"))
+                try
                 {
-                    timeout = int.Parse(AbandonSwitches(pargs)[0]);
-                    watch.Path = AbandonSwitches(pargs)[1];
+                    timeout = int.Parse(AbandonSwitches(pargs).First());
                 }
-            }
-            catch (ArgumentException e)
-            {
-                Console.WriteLine("Error: Directory path does not exist or was not in the right format.");
-                outputUsage();
-                return 1;
-            }
-            catch (FormatException e)
-            {
-                Console.WriteLine("Error: Timeout value not in the right format. Must be an integer.");
-                outputUsage();
-                return 1;
-            }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error: Timeout value not in the right format. Must be an integer.");
+                    outputUsage();
+                    return 1;
+                }
             
             if (pargs.Contains("-d"))
                 watch.Deleted += new FileSystemEventHandler(handler);
@@ -122,9 +128,7 @@ namespace Shi_tsu
             if (timeout == -1)
                 while (Console.ReadKey(true).KeyChar != 'q') ;
             else
-            {
                 System.Threading.Thread.Sleep(timeout);
-            }
             return 0;
         }
     }
