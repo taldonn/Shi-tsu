@@ -41,33 +41,7 @@ namespace Shi_tsu
             help("-t timeout", "Set an integer timeout value (in ms). The program will");
             help("", "automatically exit after the timeout has been exceeded.");
         }
-
-        // Turn -abc into -a -b -c and keep --abc the same
-        protected static List<string> ParamForm(string[] arga)
-        {
-            List<string> final = new List<string>();
-            arga.ToList().ForEach(arg =>
-            {
-                if (arg.StartsWith("-") && !arg.StartsWith("--"))
-                {
-                    foreach (char c in arg.Replace("-", ""))
-                    {
-                        final.Add(string.Format("-{0}", c));
-                    }
-                }
-                else
-                {
-                    final.Add(arg);
-                }
-            });
-            return final;
-        }
-
-        protected static List<string> AbandonSwitches(List<string> a)
-        {
-            return (from p in a where !p.StartsWith("-") select p).ToList();
-        }
-
+        
         protected static Tuple<string, DateTime> last;
         protected static void handler(object o, FileSystemEventArgs e)
         {
@@ -83,76 +57,61 @@ namespace Shi_tsu
         }
  
         protected static int getPath(List<string> args, FileSystemWatcher watch)
-        {            
-            if (AbandonSwitches(args).Count < 
-                (args.Contains("-t") ? 2 : 1))
+        {
+            try
             {
-                watch.Path = ".";
-                return 0;
+                watch.Path = args.YankNS(0, ".");
             }
-            else
+            catch (ArgumentException)
             {
-                try
-                {
-                    if (!args.Contains("-t"))
-                        watch.Path = AbandonSwitches(args).First();
-                    else
-                        watch.Path = AbandonSwitches(args)[1];
-                }
-                catch (ArgumentException)
-                {
-                    Console.WriteLine(pathErr);
-                    outputUsage();
-                    return 1;
-                }           
-                return 0; 
-            }
+                Console.WriteLine(pathErr);
+                outputUsage();
+                return 1;
+            }           
+            return 0; 
         }
         protected static int getTimeout(List<string> args, out int timeout)
         {
-            if (args.Contains("-t"))
-                try
-                {
-                    timeout = int.Parse(AbandonSwitches(args).First());
-                }
-                catch (Exception)
-                {
-                    timeout = -1;
-                    Console.WriteLine(timeErr);
-                    outputUsage();
-                    return 1;
-                }
-            else
+            try
+            {
+                timeout = int.Parse(args.ExtractParam("-t", "-1"));
+                return 0;
+            }
+            catch (Exception)
+            {
                 timeout = -1;
-            return 0;
+                Console.WriteLine(timeErr);
+                outputUsage();
+                return 1;
+            }
         }
 
         protected static FileSystemWatcher watch;
         public static int Main(string[] args)
         {
-            List<string> pargs = ParamForm(args);
-            if (pargs.Contains("-h") || pargs.Contains("--help"))
+            List<string> pargs = ndclTools.ParamForm(args);
+            if (pargs.FindParam("-h") || pargs.FindParam("--help"))
             {
                 outputHelp();
                 return 0;
             }
-            watch = new FileSystemWatcher();
-            if(getPath(pargs, watch) == 1)
-                return 1;
-
             int timeout;
             if (getTimeout(pargs, out timeout) == 1)
                 return 1;
+
+            watch = new FileSystemWatcher();
+            if(getPath(pargs, watch) == 1)
+                return 1;
             
-            if (pargs.Contains("-d"))
+            if (pargs.FindParam("-d"))
                 watch.Deleted += new FileSystemEventHandler(handler);
-            if (!pargs.Contains("-c"))
+            if (!pargs.FindParam("-c"))
                 watch.Changed += new FileSystemEventHandler(handler);
-            if (!pargs.Contains("-C"))
+            if (!pargs.FindParam("-C"))
                 watch.Created += new FileSystemEventHandler(handler);
-            if (!pargs.Contains("-r"))
+            if (!pargs.FindParam("-r"))
                 watch.Renamed += new RenamedEventHandler(handler);
-            watch.IncludeSubdirectories = pargs.Contains("-s");
+            watch.IncludeSubdirectories = pargs.FindParam("-s");
 
             last = new Tuple<string, DateTime>("", DateTime.Now);
 

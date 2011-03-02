@@ -133,7 +133,7 @@ namespace Test
             Assert.AreEqual(1, Main(testArgs.ToArray()));
 
             consoleout.BaseStream.Position = 0;
-            Assert.AreEqual("Error: Timeout value not in the right format. Must be an integer.",
+            Assert.AreEqual(timeErr,
                 consoleout.ReadLine());
         }
         [Test]
@@ -165,7 +165,7 @@ namespace Test
             Assert.AreEqual(1, Main(testArgs.ToArray()));
 
             consoleout.BaseStream.Position = 0;
-            Assert.AreEqual("Error: Directory path does not exist or was not in the right format.",
+            Assert.AreEqual(pathErr,
                 consoleout.ReadLine());
         }
         [Test]
