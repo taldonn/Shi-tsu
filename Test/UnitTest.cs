@@ -209,5 +209,34 @@ namespace Test
             //create in subdirectory
             Assert.AreEqual("./s/s/test", s);
         }
+
+        public void giveinkeys(StreamWriter w)
+        {
+            System.Threading.Thread.Sleep(100);
+            w.Write('t');
+            w.Flush();
+            w.BaseStream.Position = 0;
+            System.Threading.Thread.Sleep(100);
+            w.Write('q');
+            w.Flush();
+            w.BaseStream.Position = 0;
+        }
+        [Test]
+        public void qin()
+        {
+            using (MemoryStream m = new MemoryStream(4))
+            {
+                Console.SetIn(new StreamReader(m));
+                System.Threading.Thread t = 
+                    new System.Threading.Thread(
+                        () => giveinkeys(new StreamWriter(m)));
+                DateTime before = DateTime.Now;
+                t.Start();
+                Main(testArgs.ToArray());
+                DateTime after = DateTime.Now;
+                Assert.IsTrue(after - before >= TimeSpan.FromMilliseconds(175));
+                Assert.IsTrue(after - before <= TimeSpan.FromMilliseconds(300));
+            }
+        }
     }
 }

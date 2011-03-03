@@ -117,7 +117,7 @@ namespace Shi_tsu
 
             watch.EnableRaisingEvents = true;
             if (timeout == -1)
-                while (Console.ReadKey(true).KeyChar != 'q') ;
+                while (Console.Read() != 'q') ;
             else
                 System.Threading.Thread.Sleep(timeout);
             return 0;
