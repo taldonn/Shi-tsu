@@ -56,7 +56,7 @@ namespace Shi_tsu
             last = new Tuple<string,DateTime>(e.Name, DateTime.Now.AddMilliseconds(200));
         }
  
-        protected static int getPath(List<string> args, FileSystemWatcher watch)
+        protected static bool getPath(List<string> args, FileSystemWatcher watch)
         {
             try
             {
@@ -66,23 +66,23 @@ namespace Shi_tsu
             {
                 Console.WriteLine(pathErr);
                 outputUsage();
-                return 1;
+                return false;
             }           
-            return 0; 
+            return true; 
         }
-        protected static int getTimeout(List<string> args, out int timeout)
+        protected static bool getTimeout(List<string> args, out int timeout)
         {
             try
             {
                 timeout = int.Parse(args.ExtractParam("-t", "-1"));
-                return 0;
+                return true;
             }
             catch (Exception)
             {
                 timeout = -1;
                 Console.WriteLine(timeErr);
                 outputUsage();
-                return 1;
+                return false;
             }
         }
 
@@ -96,11 +96,11 @@ namespace Shi_tsu
                 return 0;
             }
             int timeout;
-            if (getTimeout(pargs, out timeout) == 1)
+            if (!getTimeout(pargs, out timeout))
                 return 1;
 
             watch = new FileSystemWatcher();
-            if(getPath(pargs, watch) == 1)
+            if(!getPath(pargs, watch))
                 return 1;
             
             if (pargs.FindParam("-d"))
